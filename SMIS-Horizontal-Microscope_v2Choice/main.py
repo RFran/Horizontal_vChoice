@@ -1,9 +1,4 @@
-# --------------------------------------------------------------------
 
-# Editeur: Matthias Glachant (glachant.matthias@gmail.com  )
-# Date: 7/6/2016
-
-# --------------------------------------------------------------------
 
 import logging
 import sys  # We need sys so that we can pass argv to QApplication
