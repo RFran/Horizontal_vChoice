@@ -808,7 +808,7 @@ class MainHorizontalWindow(QtGui.QMainWindow, Horizontal_ui.Ui_MainWindow):
                 mouve(5, -200/s, 'RELAT')    # On se positionne pour réaliser un nouveaux scan
                 mouve(6, -400/s, 'RELAT')
                 self.Di.setText(str(20/s))     #Di=diamètre                 # On envoie les paramètres du scan de présicion, 
-                self.intT.setText(str(100))    #intT = temsp d'intégration  #l'utilisateur n'a plus le choix      
+                self.intT.setText(str(100))    #intT = temsp d'intégration     #l'utilisateur n'a plus le choix des paramètres      
                 self.StepC.setText(str(2/s))   #Le pas en Y vaut désormais 2µm
                 self.StepZ.setText(str(2))     #Le pas en z vaut désormais 2µm
 
