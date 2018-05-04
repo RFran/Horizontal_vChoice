@@ -754,11 +754,11 @@ class MainHorizontalWindow(QtGui.QMainWindow, Horizontal_ui.Ui_MainWindow):
     def Scan(self):
 
         intTval = convert_str_int(self.intT.text(), 1000)   # On lit la valeur du temps d'ingration choisi par l'utilisateur
-        spec.integration_time_micros(intTval)  # Temps d'intégration en micro secondes * 1000 -> ms
-        diameterZ = convert_str_int(self.Di.text(), 40)
-        diameterY = convert_str_int(self.Di.text(), 30)
-        pasY = convert_str_int(self.StepC.text(), 20)
-        pasZ = convert_str_int(self.StepZ.text(), 40)
+        spec.integration_time_micros(intTval)  # On applique le temps d'intégration choisis
+        diameterZ = convert_str_int(self.Di.text(), 40) + 2 * pasZ     # On lit la valeur de diamètre de l'échantillon indiqué par l'utilisateur
+        diameterY = convert_str_int(self.Di.text(), 30) + pasY    # On définit un deuxième diamètre car le facteur de conversion pour convertir
+        pasY = convert_str_int(self.StepC.text(), 20)             #les pas moteurs en µm n'est pas le même pour Y et Z
+        pasZ = convert_str_int(self.StepZ.text(), 40) 
 
 
 
@@ -769,11 +769,11 @@ class MainHorizontalWindow(QtGui.QMainWindow, Horizontal_ui.Ui_MainWindow):
 
 
         for w in range(0, diameterZ, 2*pasZ):                     # Boucle pour le mouvement latéral
-            for i in range(0, diameterY, pasY):                    #Boucle mouvement vertical haut
-                L = spec.wavelengths()  # Liste des Longueurs d'ondes
-                 #l = spec.intensities()  # Liste des Intensités
+            for i in range(0, diameterY, pasY):                    #Boucle mouvement vertical bas
+                L = spec.wavelengths()         # Liste de toutes les longueurs d'ondes -> [660nm;740nm]
+                 #l = spec.intensities()        # Liste de toutes les intensités Intensités
                 mouve(5, pasY, 'RELAT')                # On se déplace par rapport à la valeur précédente
-                LIM.append(max(spec.intensities()))       # On stocke l'intensité max à chaque point
+                LIM.append(max(spec.intensities()))       # On stocke l'intensité max pour chaque point
                 Y = execution(ser, '?CNT' + str(5))        # On lit la coordonée en Y
                 Z = execution(ser, '?CNT' + str(6))        # On lit la coordonée en Z
                 LY.append(Y)           # On stocke la coordonée en Y
@@ -782,8 +782,8 @@ class MainHorizontalWindow(QtGui.QMainWindow, Horizontal_ui.Ui_MainWindow):
                 print(L)
                 #print(max(spec.intensities()))     # Indication de l'intensité max à chaque tour
 
-            mouve(6, pasZ, 'RELAT')       # on se déplace par rapport à la valeur précédente
-            for i in range(0, diameterY, pasY):             # Boucle mouvement veritcal bas
+            mouve(6, pasZ, 'RELAT')       # on se déplace en Z par rapport à la valeur précédente
+            for i in range(0, diameterY, pasY):             # Boucle mouvement veritcal haut
                 # L = spec.wavelengths()  # Liste des Longeurs d'ondes
                 #l = spec.intensities()  # Liste des Intensités
                 mouve(5, -pasY, 'RELAT')
@@ -797,22 +797,20 @@ class MainHorizontalWindow(QtGui.QMainWindow, Horizontal_ui.Ui_MainWindow):
             z = 300
             mouve(6, pasZ, 'RELAT')
 
-        cLZ = np.asarray(LZ)
-        cLY = np.asarray(LY)
-        cLim = np.asarray(LIM)
+        
 
-        def zoom_scan():
+        def zoom_scan():           # On créer la fonction qui permet d'afficher la fenêtre 
             s=1
             choice = QtGui.QMessageBox.question(self, 'Precision Scan', "Do you want to get a more accurate point?",
                                                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
             if choice == QtGui.QMessageBox.Yes:
-                mouve(4, -300, 'RELAT')
-                mouve(5, -200/s, 'RELAT')
+                mouve(4, -300, 'RELAT')      # Mouvement sur l'axe S (moteur n°4)
+                mouve(5, -200/s, 'RELAT')    # On se positionne pour réaliser un nouveaux scan
                 mouve(6, -400/s, 'RELAT')
-                self.Di.setText(str(20/s))
-                self.intT.setText(str(100))
-                self.StepC.setText(str(2/s))
-                self.StepZ.setText(str(2))
+                self.Di.setText(str(20/s))     #Di=diamètre                 # On envoie les paramètres du scan de présicion, 
+                self.intT.setText(str(100))    #intT = temsp d'intégration  #l'utilisateur n'a plus le choix      
+                self.StepC.setText(str(2/s))   #Le pas en Y vaut désormais 2µm
+                self.StepZ.setText(str(2))     #Le pas en z vaut désormais 2µm
 
             else:
                 pass
@@ -832,12 +830,6 @@ class MainHorizontalWindow(QtGui.QMainWindow, Horizontal_ui.Ui_MainWindow):
         mouve(5, Y_max,'ABSOL')               # On se positione sur le ruby à la fin du scan
         mouve(6, Z_max, 'ABSOL')
         zoom_scan()
-
-
-
-
-        #mouve(4, 4000, 'RELAT')
-        #mouve()
 
 
 
